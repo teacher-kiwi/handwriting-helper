@@ -1,0 +1,394 @@
+/* ===== Fonts ===== */
+@import url('https://fonts.googleapis.com/css2?family=Gowun+Batang&family=Nanum+Myeongjo&family=Noto+Serif+KR&family=Song+Myung&family=Yeon+Sung&display=swap');
+
+/* ===== Reset & Base ===== */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: 'Pretendard', 'Noto Sans KR', sans-serif;
+  background: #f5f5f5;
+  color: #333;
+}
+
+/* ===== Layout ===== */
+.app-layout {
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ===== Controls Panel ===== */
+.controls {
+  margin: 1rem auto;
+  width: 100%;
+  max-width: 800px;
+  padding: 2rem;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+}
+
+/* Desktop side-by-side (>= 1280px) */
+@media (min-width: 1280px) {
+  .app-layout {
+    flex-direction: row;
+    justify-content: center;
+    align-items: flex-start;
+    gap: 2rem;
+    min-height: 100vh;
+    padding: 1rem 2rem;
+  }
+
+  #output {
+    width: 210mm;
+    flex-shrink: 0;
+    margin: 0;
+  }
+
+  .controls {
+    position: sticky;
+    top: 1rem;
+    /* flex: 1; */
+    /* max-width: 520px; */
+    margin: 0;
+    max-height: calc(100vh - 2rem);
+    overflow-y: auto;
+  }
+}
+
+.controls h1 {
+  font-size: 1.5rem;
+  margin-bottom: 1.5rem;
+  text-align: center;
+}
+
+.input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.input-group label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #555;
+}
+
+textarea, input[type="text"], input[type="number"], select {
+  padding: 0.5rem 0.7rem;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 0.95rem;
+  font-family: inherit;
+}
+
+textarea {
+  resize: vertical;
+  width: 100%;
+}
+
+.options-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-top: 1rem;
+  align-items: flex-end;
+}
+
+.options-row .input-group {
+  flex: 1;
+  min-width: 120px;
+}
+
+/* Font button group */
+.font-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.font-btn {
+  padding: 0.45rem 0.8rem;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  background: #fff;
+  font-size: 0.9rem;
+  font-weight: 400;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.font-btn:hover {
+  border-color: #999;
+  background: #fafafa;
+}
+
+.font-btn.active {
+  border-color: #4a90d9;
+  background: #eef4fb;
+  color: #2a6cb8;
+  font-weight: 600;
+}
+
+.checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+
+.checkbox-label .hint {
+  font-size: 0.75rem;
+  color: #999;
+}
+
+.button-row {
+  display: flex;
+  gap: 0.8rem;
+  margin-top: 1.5rem;
+  justify-content: center;
+}
+
+button {
+  padding: 0.7rem 2rem;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+#printBtn {
+  background: #e0e0e0;
+  color: #333;
+}
+#printBtn:hover {
+  background: #d0d0d0;
+}
+
+/* ===== Output Area ===== */
+#output {
+  max-width: 210mm;
+  margin: 2rem auto;
+}
+
+.sheet {
+  background: #fff;
+  padding: 15mm;
+  margin-bottom: 1rem;
+  display: flex;
+  flex-direction: column;
+}
+
+.sheet-title {
+  text-align: center;
+  font-size: 1.3rem;
+  font-weight: 700;
+  margin-bottom: 10mm;
+  color: #333;
+}
+
+.sheet-title-print {
+  display: none;
+}
+
+/* Page number */
+.page-number {
+  text-align: center;
+  font-size: 0.85rem;
+  color: #999;
+  margin-top: auto;
+  padding-top: 5mm;
+}
+
+/* ===== Grid ===== */
+.grid-row {
+  display: flex;
+  justify-content: center;
+}
+
+.grid-cell {
+  position: relative;
+  border: 1px solid #aaa;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 400;
+  line-height: 1;
+  overflow: hidden;
+  z-index: 0;
+}
+
+/* Collapse adjacent borders */
+.grid-row + .grid-row .grid-cell {
+  border-top: none;
+}
+
+.grid-cell + .grid-cell {
+  border-left: none;
+}
+
+/* Center cross dashed lines */
+.grid-cell::before,
+.grid-cell::after {
+  content: '';
+  position: absolute;
+  pointer-events: none;
+  z-index: -1;
+}
+
+.grid-cell::before {
+  /* horizontal dashed line */
+  top: 50%;
+  left: 4px;
+  right: 4px;
+  height: 0;
+  border-top: 1px dashed #ccc;
+  transform: translateY(-50%);
+}
+
+.grid-cell::after {
+  /* vertical dashed line */
+  left: 50%;
+  top: 4px;
+  bottom: 4px;
+  width: 0;
+  border-left: 1px dashed #ccc;
+  transform: translateX(-50%);
+}
+
+/* Row types */
+.grid-cell.cell-main {
+  color: #000;
+}
+
+.grid-cell.cell-guide {
+  color: #ccc;
+}
+
+.grid-cell.cell-blank {
+  color: transparent;
+}
+
+/* Half-width pair: two chars side by side, no font-size change */
+.hw-pair {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  align-items: center;
+}
+
+.hw-pair > span {
+  flex: 1;
+  text-align: center;
+}
+
+/* 원고지 문장부호 위치 */
+.grid-cell .pos-bl {
+  position: absolute;
+  left: 12%;
+  bottom: 8%;
+}
+
+.grid-cell .pos-tr {
+  position: absolute;
+  right: 8%;
+  top: 8%;
+}
+
+.grid-cell .pos-tl {
+  position: absolute;
+  left: 8%;
+  top: 8%;
+}
+
+
+/* Name line */
+.name-line {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 0.3rem;
+  margin-bottom: 5mm;
+  font-size: 0.95rem;
+  color: #555;
+}
+
+.name-line span {
+  display: inline-block;
+  border-bottom: 1px solid #aaa;
+  width: 80px;
+}
+
+/* ===== Print Styles ===== */
+@media print {
+  @page {
+    size: A4;
+    margin: 0;
+  }
+
+  body {
+    background: #fff;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  .no-print {
+    display: none !important;
+  }
+
+  .app-layout {
+    display: block;
+  }
+
+  .sheet-title-print {
+    display: block;
+  }
+
+  #output {
+    margin: 0;
+    max-width: none;
+  }
+
+  .sheet {
+    width: 210mm;
+    height: 297mm;
+    padding: 15mm;
+    margin: 0;
+    box-shadow: none;
+    page-break-after: always;
+    page-break-inside: avoid;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .sheet:last-child {
+    page-break-after: auto;
+  }
+
+  .grid-row {
+    page-break-inside: avoid;
+  }
+
+  .grid-cell {
+    border-color: #aaa !important;
+  }
+
+  .grid-cell::before {
+    border-top-color: #ccc !important;
+  }
+
+  .grid-cell::after {
+    border-left-color: #ccc !important;
+  }
+
+  .grid-cell.cell-guide {
+    color: #ccc !important;
+  }
+}

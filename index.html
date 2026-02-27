@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>따라쓰기 학습지 생성기</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="app-layout">
+  <div class="controls no-print">
+    <h1>따라쓰기 학습지 생성기</h1>
+
+    <div class="input-group">
+      <label for="textInput">연습할 문장 입력</label>
+      <textarea id="textInput" rows="4" placeholder="여기에 연습할 문장을 입력하세요..."></textarea>
+    </div>
+
+    <div class="options-row">
+      <div class="input-group">
+        <label for="colCount">한 줄 칸 수</label>
+        <select id="colCount">
+          <option value="8">8칸</option>
+          <option value="10" selected>10칸</option>
+          <option value="15">15칸</option>
+          <option value="20">20칸</option>
+        </select>
+      </div>
+
+      <div class="input-group">
+        <label for="guideRows">가이드 줄 수</label>
+        <input type="number" id="guideRows" value="1" min="0" max="10">
+      </div>
+
+      <div class="input-group">
+        <label for="blankRows">빈칸 줄 수</label>
+        <input type="number" id="blankRows" value="1" min="0" max="10">
+      </div>
+
+    </div>
+
+    <div class="input-group" style="margin-top:1rem;">
+      <label>글꼴 선택</label>
+      <div class="font-group" id="fontGroup">
+        <button type="button" class="font-btn active" data-font="'Noto Serif KR', serif" style="font-family:'Noto Serif KR',serif">노토 세리프</button>
+        <button type="button" class="font-btn" data-font="'Nanum Myeongjo', serif" style="font-family:'Nanum Myeongjo',serif">나눔명조</button>
+        <button type="button" class="font-btn" data-font="'Gowun Batang', serif" style="font-family:'Gowun Batang',serif">고운바탕</button>
+        <button type="button" class="font-btn" data-font="'Song Myung', serif" style="font-family:'Song Myung',serif">송명</button>
+        <button type="button" class="font-btn" data-font="'Yeon Sung', cursive" style="font-family:'Yeon Sung',cursive">연성</button>
+      </div>
+    </div>
+
+    <!-- <div class="options-row">
+      <label class="checkbox-label">
+        <input type="checkbox" id="optHeadProhibit" checked>
+        행두 금칙 적용 <span class="hint">(마침표 등이 줄 첫 칸에 오지 않도록)</span>
+      </label>
+      <label class="checkbox-label">
+        <input type="checkbox" id="optTailProhibit" checked>
+        행말 금칙 적용 <span class="hint">(여는 따옴표가 줄 끝에 오지 않도록)</span>
+      </label>
+      <label class="checkbox-label">
+        <input type="checkbox" id="optNewlineIndent" checked>
+        줄바꿈 시 들여쓰기 <span class="hint">(다음 줄 첫 칸 비움)</span>
+      </label>
+    </div> -->
+
+    <div class="options-row">
+      <div class="input-group">
+        <label for="titleInput">학습지 제목 (선택)</label>
+        <input type="text" id="titleInput" placeholder="예: 받아쓰기 연습">
+      </div>
+    </div>
+
+    <div class="button-row">
+      <button id="printBtn" type="button">인쇄하기</button>
+    </div>
+  </div>
+
+  <div id="output"></div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
