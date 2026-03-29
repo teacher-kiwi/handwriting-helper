@@ -1,5 +1,5 @@
 /* ===== Fonts ===== */
-@import url('https://fonts.googleapis.com/css2?family=Gowun+Batang&family=Nanum+Myeongjo&family=Noto+Serif+KR&family=Song+Myung&family=Yeon+Sung&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Dongle&family=Gamja+Flower&family=Gowun+Batang&family=Gowun+Dodum&family=Jua&family=Nanum+Myeongjo&family=Nanum+Pen+Script&family=Noto+Serif+KR&family=Song+Myung&family=Yeon+Sung&display=swap');
 
 /* ===== Reset & Base ===== */
 *, *::before, *::after {
@@ -52,8 +52,6 @@ body {
   .controls {
     position: sticky;
     top: 1rem;
-    /* flex: 1; */
-    /* max-width: 520px; */
     margin: 0;
     max-height: calc(100vh - 2rem);
     overflow-y: auto;
@@ -62,8 +60,28 @@ body {
 
 .controls h1 {
   font-size: 1.5rem;
-  margin-bottom: 1.5rem;
+  margin-bottom: 0.5rem;
   text-align: center;
+}
+
+/* 출처 부제목 스타일 */
+.controls h3 {
+  font-size: 0.9rem;
+  font-weight: 400;
+  color: #666;
+  text-align: center;
+  margin-bottom: 1.5rem;
+  word-break: keep-all;
+}
+
+.controls h3 a {
+  color: #4a90d9;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.controls h3 a:hover {
+  text-decoration: underline;
 }
 
 .input-group {
@@ -84,6 +102,15 @@ textarea, input[type="text"], input[type="number"], select {
   border-radius: 6px;
   font-size: 0.95rem;
   font-family: inherit;
+}
+
+input[type="color"] {
+  padding: 2px 4px;
+  height: 36px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  cursor: pointer;
+  width: 100%;
 }
 
 textarea {
@@ -296,6 +323,12 @@ button {
   bottom: 8%;
 }
 
+.grid-cell .pos-br {
+  position: absolute;
+  right: 12%;
+  bottom: 8%;
+}
+
 .grid-cell .pos-tr {
   position: absolute;
   right: 8%;
@@ -308,6 +341,23 @@ button {
   top: 8%;
 }
 
+.grid-cell .pos-center {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.v-mark {
+  position: absolute;
+  right: -6px;
+  bottom: 2px;
+  color: #d32f2f;
+  font-size: 0.75rem;
+  font-family: sans-serif;
+  font-weight: bold;
+  z-index: 10;
+}
 
 /* Name line */
 .name-line {
@@ -333,10 +383,12 @@ button {
     margin: 0;
   }
 
-  body {
+  html, body {
     background: #fff;
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
+    margin: 0 !important;
+    padding: 0 !important;
   }
 
   .no-print {
@@ -345,6 +397,8 @@ button {
 
   .app-layout {
     display: block;
+    padding: 0 !important;
+    margin: 0 !important;
   }
 
   .sheet-title-print {
@@ -352,13 +406,14 @@ button {
   }
 
   #output {
-    margin: 0;
+    margin: 0 !important;
+    padding: 0 !important;
     max-width: none;
   }
 
   .sheet {
     width: 210mm;
-    height: 297mm;
+    height: 296.5mm; /* 297mm에서 미세하게 줄여 넘침 방지 */
     padding: 15mm;
     margin: 0;
     box-shadow: none;
@@ -366,6 +421,8 @@ button {
     page-break-inside: avoid;
     display: flex;
     flex-direction: column;
+    overflow: hidden;
+    box-sizing: border-box;
   }
 
   .sheet:last-child {
@@ -390,5 +447,9 @@ button {
 
   .grid-cell.cell-guide {
     color: #ccc !important;
+  }
+
+  .v-mark {
+    color: #d32f2f !important;
   }
 }
