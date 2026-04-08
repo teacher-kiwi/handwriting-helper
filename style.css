@@ -316,6 +316,15 @@ button {
   text-align: center;
 }
 
+/* 행말/행두 금칙으로 여러 글자가 한 칸에 압축: 자간 축소, 글자 크기 유지 */
+.squeeze-cell {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  white-space: nowrap;
+  line-height: 1;
+}
+
 /* 원고지 문장부호 위치 */
 .grid-cell .pos-bl {
   position: absolute;
