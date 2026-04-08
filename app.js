@@ -60,10 +60,12 @@ function cleanText(text) {
   text = convertSmartQuotes(text);
   // 말줄임표 규칙: 3~6개의 점이나 1~2개의 줄임표를 2칸 차지하는 '……'로 변환
   text = text.replace(/\.{3,6}|…{1,2}/g, '……');
-  // 온점/반점 규칙: 뒤에 오는 띄어쓰기(공백/탭) 제거
-  text = text.replace(/([.,]["']?)[ \t]+/g, '$1');
+  // 온점/반점 뒤 공백 제거 (스마트따옴표 포함)
+  text = text.replace(/([.,][\u201D\u2019"']?)[ \t]+/g, '$1');
+  // 느낌표/물음표 뒤: 닫는따옴표 앞 공백 제거 (? " → ?" 처리)
+  text = text.replace(/([!?])[ \t]+([\u201D\u2019"'])/g, '$1$2');
   // 느낌표/물음표 규칙: 뒤에 띄어쓰기 강제 추가 (닫는 따옴표나 이미 공백이 있지 않은 경우)
-  text = text.replace(/([!?]["']?)(?=[^\s"'])/g, '$1 ');
+  text = text.replace(/([!?][\u201D\u2019"']?)(?=[^\s\u201D\u2019"'])/g, '$1 ');
   return text;
 }
 
@@ -116,6 +118,7 @@ function layoutText(text, cols, useParagraphIndent, useDialogueBreak) {
       if (pi === paragraphs.length - 1) continue; // 마지막 줄이 빈 줄이면 무시
       const emptyRow = [];
       while (emptyRow.length < cols) emptyRow.push({ text: '', vMark: false });
+      emptyRow.isParagraphBreak = true; // 문단 구분 행 마킹 → guide/blank 생략
       rows.push(emptyRow);
       continue;
     }
@@ -129,17 +132,35 @@ function layoutText(text, cols, useParagraphIndent, useDialogueBreak) {
       row.push({ text: '', vMark: false });
     }
 
+    // 닫는따옴표 행두금칙: 닫는따옴표(", ')만 대상
+    const CLOSING_QUOTE_RE = /^[\u201D\u2019"']/;
+
     let i = 0;
     while (i < tokens.length) {
       const char = tokens[i];
 
-      // 1. 줄이 다 찼을 때 줄바꿈 및 행말 금칙 적용 (순서 최상단으로 이동)
+      // 0. 행두금칙: 새 줄 시작 직후 닫는따옴표가 오면 이전 줄 마지막 칸에 흡수
+      if (CLOSING_QUOTE_RE.test(char) && rows.length > 0) {
+        const isNewLine = row.every(c => c.text === '');
+        if (isNewLine) {
+          const prevRow = rows[rows.length - 1];
+          const lastCell = prevRow[cols - 1];
+          lastCell.text += char;
+          lastCell.squeezed = ([...lastCell.text].length > 1);
+          i++;
+          continue;
+        }
+      }
+
+      // 1. 줄이 다 찼을 때 줄바꿈 및 행말 금칙 적용
       if (row.length >= cols) {
-        const isProhibitedStart = /^[.,?!'"\u201D\u2019]/.test(char);
+        const isProhibitedStart = /^[.,?!"\u201D\u2019]/.test(char);
 
         if (isProhibitedStart) {
-          // 행말 금칙: 줄 끝에 문자 추가 후 밀어내기
-          row[cols - 1].text += char;
+          // 행말 금칙: 줄 끝 마지막 칸에 함께 표시 후 줄바꿈
+          const lastCell = row[cols - 1];
+          lastCell.text += char;
+          lastCell.squeezed = ([...lastCell.text].length > 1);
           rows.push(row);
           row = [];
           if (useParagraphIndent && inDialogue) row.push({ text: '', vMark: false });
@@ -205,10 +226,13 @@ function layoutText(text, cols, useParagraphIndent, useDialogueBreak) {
       i++;
     }
 
-    while (row.length < cols) {
-      row.push({ text: '', vMark: false });
+    // 마지막 행 push: 실제 내용이 있을 때만 추가 (행말금칙으로 row=[] 리셋된 경우 방지)
+    if (row.some(c => c.text !== '')) {
+      while (row.length < cols) {
+        row.push({ text: '', vMark: false });
+      }
+      rows.push(row);
     }
-    rows.push(row);
   }
 
   if (rows.length === 0) {
@@ -247,9 +271,41 @@ function populateCell(cell, tokenObj, cellSizeMm, fontConfig) {
 
   const text = tokenObj.text;
   const vMark = tokenObj.vMark;
+  const squeezed = tokenObj.squeezed;
 
   if (text) {
     const chars = [...text];
+
+    // 행말/행두 금칙으로 여러 글자가 한 칸에 들어가는 경우
+    if (squeezed && chars.length >= 2) {
+      const wrapper = document.createElement('span');
+      wrapper.className = 'squeeze-cell';
+      if (chars.length >= 3) {
+        // 3자 이상: 균등 축소(scale) — scaleX는 찌그러지므로 비율 유지
+        const scale = Math.max(0.6, 0.9 / chars.length * 2);
+        wrapper.style.transform = `scale(${scale})`;
+        wrapper.style.transformOrigin = 'center center';
+        wrapper.style.display = 'inline-block';
+        wrapper.style.letterSpacing = '-0.05em';
+      } else {
+        // 2자: letter-spacing만 축소
+        wrapper.style.letterSpacing = '-0.18em';
+      }
+      for (const ch of chars) {
+        const s = document.createElement('span');
+        s.textContent = ch;
+        wrapper.appendChild(s);
+      }
+      cell.appendChild(wrapper);
+      if (vMark) {
+        const vSpan = document.createElement('span');
+        vSpan.className = 'v-mark';
+        vSpan.textContent = '∨';
+        cell.appendChild(vSpan);
+      }
+      return;
+    }
+
     if (chars.length === 1) {
       if (text === '…') {
         const span = document.createElement('span');
@@ -382,6 +438,8 @@ function generateSheets(textRows, cols, guideCount, blankCount, cellSizeMm, font
   const allVisualRows = [];
   for (const textRow of textRows) {
     allVisualRows.push({ type: 'cell-main', chars: textRow });
+    // 문단 구분 행(빈 줄)은 guide/blank 없이 한 행만 추가
+    if (textRow.isParagraphBreak) continue;
     for (let g = 0; g < guideCount; g++) {
       allVisualRows.push({ type: 'cell-guide', chars: textRow });
     }
